@@ -143,46 +143,84 @@ type Tracker struct {
 	Workouts []Workout
 }
 
-func main() {
-	var strengtName string
+func (t Tracker) TotalVolume() float64 {
+	var total float64
+	for _, w := range t.Workouts {
+		for _, e := range w.Exercises {
+			total += e.Volume()
+		}
+	}
+	return total
+}
+
+func inputStrengthExercise() StrengthExercise {
 	fmt.Println("Введите название силового упражнения: ")
-	fmt.Scan(&strengtName)
-	var strengtWeight float64
-	var counter, strengtReps int
+	var name string
+	fmt.Scan(&name)
 	fmt.Println("Введите количество подходов: ")
+	var counter int
 	fmt.Scan(&counter)
 	sets := []Set{}
+	var strengtWeight float64
+	var strengtReps int
 	for i := 0; i < counter; i++ {
-		fmt.Printf("Введите вес и количество повторений для %d подхода:\n", i+1)
+		fmt.Printf("Введи вес и количество повторений для %d подхода:", i+1)
 		fmt.Scan(&strengtWeight, &strengtReps)
 		currentSet := Set{Weight: strengtWeight, Reps: strengtReps}
 		sets = append(sets, currentSet)
 	}
-	strengt := NewStrengthExercise(strengtName, sets)
+	return NewStrengthExercise(name, sets)
+}
 
+func inputCardioExercise() CardioExercise {
 	fmt.Println("Введите название кардио упражнения: ")
 	var cardioName, cardioType string
 	fmt.Scan(&cardioName)
-	fmt.Println("Введите тип кардио упражнения (бег/ходьба/велосипед): ")
+	fmt.Println("Введите тип кардио упражнения: ")
 	fmt.Scan(&cardioType)
-	fmt.Println("Введите дистанцию, время выполнения кардио и вес тела: ")
-	var cardioDistance, cardioDuration, bodyWeight float64
-	fmt.Scan(&cardioDistance, &cardioDuration, &bodyWeight)
+	var distanse, duration, bodyweight float64
+	fmt.Println("Введите дистанцию (км), время (минуты) и собственный вес (кг): ")
+	fmt.Scan(&distanse, &duration, &bodyweight)
+	return NewCardioExercise(cardioName, cardioType, distanse, duration, bodyweight)
+}
 
-	cardio := NewCardioExercise(cardioName, cardioType, cardioDistance, cardioDuration, bodyWeight)
-
-	var bodyweigtName string
+func inputBodyweightExercise() BodyweightExercise {
 	fmt.Println("Введите название упражнения с собственным весом: ")
-	fmt.Scan(&bodyweigtName)
-	var bodyweigtReps int
-	fmt.Println("Введите количество повторений: ")
-	fmt.Scan(&bodyweigtReps)
+	var name string
+	fmt.Scan(&name)
+	fmt.Println("Введите количество повторов и собственный вес (кг): ")
+	var reps int
+	var bodyWeight float64
+	fmt.Scan(&reps, &bodyWeight)
+	return NewBodyweightExercise(name, reps, bodyWeight)
+}
 
-	bw := NewBodyweightExercise(bodyweigtName, bodyweigtReps, bodyWeight)
+func main() {
+	workout := Workout{Date: "2026-10-22"}
+	var tracker Tracker
+Loop:
+	for {
+		fmt.Println("1 - силовое упражнение")
+		fmt.Println("2 - кардио упражнение")
+		fmt.Println("3 - упражнение с собственным весом")
+		fmt.Println("0 - выход")
+		fmt.Println("Выберите одно из предложенного: ")
+		var choice int8
+		fmt.Scan(&choice)
+		switch choice {
+		case 1:
+			workout.Exercises = append(workout.Exercises, inputStrengthExercise())
+		case 2:
+			workout.Exercises = append(workout.Exercises, inputCardioExercise())
+		case 3:
+			workout.Exercises = append(workout.Exercises, inputBodyweightExercise())
+		case 0:
+			tracker.Workouts = append(tracker.Workouts, workout)
+			break Loop
+		default:
+			fmt.Println("Вы ввели неверное число ")
+		}
 
-	exercises := []Exercise{strengt, cardio, bw}
-
-	for _, e := range exercises {
-		fmt.Println(e.Summary())
 	}
+	fmt.Printf("Общий объем за тренировку: %.1f\n", tracker.TotalVolume())
 }
