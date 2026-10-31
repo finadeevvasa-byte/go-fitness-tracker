@@ -143,6 +143,7 @@ type Tracker struct {
 	Workouts []Workout
 }
 
+// Общий объем тренировки
 func (t Tracker) TotalVolume() float64 {
 	var total float64
 	for _, w := range t.Workouts {
@@ -153,6 +154,24 @@ func (t Tracker) TotalVolume() float64 {
 	return total
 }
 
+// Вывод информации о тренировке по дате
+func (t Tracker) PrintWorkoutByDate(date string) {
+	found := false
+	for _, w := range t.Workouts {
+		if w.Date == date {
+			found = true
+			fmt.Printf("Информация о тренировке %s:\n", w.Date)
+			for _, e := range w.Exercises {
+				fmt.Println(e.Summary())
+			}
+		}
+	}
+	if !found {
+		fmt.Println("В эту дату не было тренировок")
+	}
+}
+
+// Ввод силового упражнения
 func inputStrengthExercise() StrengthExercise {
 	fmt.Println("Введите название силового упражнения: ")
 	var name string
@@ -172,6 +191,7 @@ func inputStrengthExercise() StrengthExercise {
 	return NewStrengthExercise(name, sets)
 }
 
+// Ввод кардио упражнения
 func inputCardioExercise() CardioExercise {
 	fmt.Println("Введите название кардио упражнения: ")
 	var cardioName, cardioType string
@@ -184,6 +204,7 @@ func inputCardioExercise() CardioExercise {
 	return NewCardioExercise(cardioName, cardioType, distanse, duration, bodyweight)
 }
 
+// Ввод упражнения с собственным весом
 func inputBodyweightExercise() BodyweightExercise {
 	fmt.Println("Введите название упражнения с собственным весом: ")
 	var name string
@@ -196,31 +217,53 @@ func inputBodyweightExercise() BodyweightExercise {
 }
 
 func main() {
-	workout := Workout{Date: "2026-10-22"}
 	var tracker Tracker
-Loop:
 	for {
-		fmt.Println("1 - силовое упражнение")
-		fmt.Println("2 - кардио упражнение")
-		fmt.Println("3 - упражнение с собственным весом")
-		fmt.Println("0 - выход")
-		fmt.Println("Выберите одно из предложенного: ")
-		var choice int8
-		fmt.Scan(&choice)
-		switch choice {
+		fmt.Println("===ГЛАВНОЕ МЕНЮ===")
+		fmt.Println("1 - Начать новую тренировку")
+		fmt.Println("2 - Посмотреть тренировку по дате")
+		fmt.Println("0 - Выйти из программы")
+		fmt.Println("Выберите одно из предложенного:")
+		var mainchoice int
+		fmt.Scan(&mainchoice)
+		switch mainchoice {
 		case 1:
-			workout.Exercises = append(workout.Exercises, inputStrengthExercise())
-		case 2:
-			workout.Exercises = append(workout.Exercises, inputCardioExercise())
-		case 3:
-			workout.Exercises = append(workout.Exercises, inputBodyweightExercise())
-		case 0:
-			tracker.Workouts = append(tracker.Workouts, workout)
-			break Loop
-		default:
-			fmt.Println("Вы ввели неверное число ")
-		}
+			var workoutDate string
+			fmt.Println("Введите дату тренировки (гг-мм-дд):")
+			fmt.Scan(&workoutDate)
+			workout := Workout{Date: workoutDate}
+		Loop:
+			for {
+				fmt.Println("1 - Силовое упражнение")
+				fmt.Println("2 - Кардио упражнение")
+				fmt.Println("3 - Упражнение с собственным весом")
+				fmt.Println("0 - Выход в главное меню")
+				fmt.Println("Выберите одно из предложенного: ")
+				var choice int
+				fmt.Scan(&choice)
+				switch choice {
+				case 1:
+					workout.Exercises = append(workout.Exercises, inputStrengthExercise())
+				case 2:
+					workout.Exercises = append(workout.Exercises, inputCardioExercise())
+				case 3:
+					workout.Exercises = append(workout.Exercises, inputBodyweightExercise())
 
+				case 0:
+					tracker.Workouts = append(tracker.Workouts, workout)
+					break Loop
+				default:
+					fmt.Println("Вы ввели неверное число ")
+				}
+			}
+		case 2:
+			var searchDate string
+			fmt.Println("Введите дату тренировки (гг-мм-дд)")
+			fmt.Scan(&searchDate)
+			tracker.PrintWorkoutByDate(searchDate)
+		case 0:
+			fmt.Println("Выход из программы")
+			return
+		}
 	}
-	fmt.Printf("Общий объем за тренировку: %.1f\n", tracker.TotalVolume())
 }
